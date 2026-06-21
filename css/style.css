@@ -1,0 +1,580 @@
+/* ═══════════════════════════════════════════
+   style.css · 在遇見妳之後
+   暖像素風 Birthday Game
+   ═══════════════════════════════════════════ */
+
+/* ── CSS 自訂變數（修改這裡可全域換色） ── */
+:root {
+  --bg:        #16162a;
+  --warm:      #f7c5a8;
+  --pink:      #f4a0b0;
+  --blue-soft: #8090d0;
+  --text:      #ece5da;
+  --muted:     #9b8ea0;
+  --wall:      #c0b8cc;
+  --floor:     #a09098;
+  --desk:      #8b6f5e;
+  --font-px:   'Press Start 2P', monospace;
+  --font-s:    'Noto Serif TC', serif;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font-s);
+  color: var(--text);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ════════════════════════════
+   場景系統
+   ════════════════════════════ */
+.scene {
+  position: fixed; inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.scene.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* 轉場黑幕 */
+.fade-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+.fade-overlay.fading {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ════════════════════════════
+   HUD（陪伴值）
+   ════════════════════════════ */
+.hud {
+  position: fixed;
+  top: 14px; right: 18px;
+  z-index: 100;
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--warm);
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(247, 197, 168, 0.28);
+  border-radius: 6px;
+  padding: 7px 14px;
+  letter-spacing: 1.5px;
+  transition: opacity 0.4s;
+}
+.hud.hidden { opacity: 0; pointer-events: none; }
+
+/* ════════════════════════════
+   共用元件
+   ════════════════════════════ */
+
+/* 像素按鈕 */
+.pixel-btn {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: #1a1a2e;
+  background: var(--warm);
+  border: none;
+  border-radius: 4px;
+  padding: 13px 26px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 0 #b87850, 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition: transform 0.08s, box-shadow 0.08s;
+  white-space: nowrap;
+}
+.pixel-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 0 #b87850, 0 10px 20px rgba(0,0,0,0.4); }
+.pixel-btn:active { transform: translateY(2px);  box-shadow: 0 2px 0 #b87850; }
+.pixel-btn.small  { font-size: 8px; padding: 9px 18px; margin-top: 18px; }
+
+/* 隱藏狀態（淡出） */
+.pixel-btn.gone { display: none; }
+
+/* 影片按鈕（粉紅色） */
+.video-btn {
+  background: var(--pink);
+  box-shadow: 0 4px 0 #b06070, 0 6px 18px rgba(0,0,0,0.45);
+  margin-top: 8px;
+}
+.video-btn:hover  { box-shadow: 0 6px 0 #b06070, 0 10px 20px rgba(0,0,0,0.4); }
+.video-btn:active { box-shadow: 0 2px 0 #b06070; }
+
+/* 章節標籤 */
+.chapter-tag {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 2.5px;
+  margin-bottom: 18px;
+}
+
+/* 彈出遮罩 */
+.overlay {
+  position: fixed; inset: 0; z-index: 150;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.35s;
+}
+.overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 閃爍提示 */
+.blink-hint {
+  font-family: var(--font-px);
+  font-size: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 5px;
+  animation: blink 1.3s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ════════════════════════════
+   場景 1 · 開始畫面
+   ════════════════════════════ */
+#scene-start { background: var(--bg); }
+
+/* 星空（JS 動態注入 .star 元素） */
+#star-canvas {
+  position: absolute; inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: twinkle var(--dur, 2s) ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: 0.08; }
+  to   { opacity: 0.9; }
+}
+
+.start-content {
+  position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.label-pixel {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 3px;
+}
+
+.game-title {
+  font-size: clamp(22px, 5.5vw, 44px);
+  font-weight: 700;
+  color: var(--warm);
+  letter-spacing: 8px;
+  line-height: 1.3;
+  text-shadow: 0 0 40px rgba(247, 197, 168, 0.45);
+}
+
+.start-desc {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 2px 0 8px;
+}
+
+/* ════════════════════════════
+   場景 2 · 灰色房間
+   ════════════════════════════ */
+#scene-chapter1 { background: #1c1c2e; gap: 0; }
+
+.room-wrap {
+  width: min(620px, 92vw);
+}
+
+.room {
+  position: relative;
+  width: 100%;
+  height: clamp(260px, 42vh, 360px);
+  background: var(--wall);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: filter 1.4s ease;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* 色彩濾鏡 - 和世界場景共用 */
+.grayscale-full { filter: grayscale(1)    brightness(0.78); }
+.grayscale-2    { filter: grayscale(0.65) brightness(0.86); }
+.grayscale-1    { filter: grayscale(0.3)  brightness(0.93); }
+.color-full     { filter: grayscale(0)    brightness(1);    }
+
+/* 地板 */
+.room-floor {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: var(--floor);
+  border-top: 3px solid rgba(0, 0, 0, 0.18);
+}
+
+/* 窗戶 */
+.room-window {
+  position: absolute; top: 28px; left: 50%; transform: translateX(-50%);
+  width: 130px; height: 100px;
+  background: #b8cce0;
+  border: 4px solid #888;
+  box-shadow: inset 0 0 24px rgba(180, 215, 245, 0.55),
+              0 0 50px rgba(180, 215, 245, 0.15);
+}
+.win-bar { position: absolute; background: #888; }
+.win-h   { top: 50%; left: 0; right: 0; height: 3px; transform: translateY(-50%); }
+.win-v   { left: 50%; top: 0; bottom: 0; width: 3px; transform: translateX(-50%); }
+
+/* 桌子 */
+.room-desk {
+  position: absolute;
+  bottom: 80px; right: 56px;
+  width: 185px; height: 62px;
+  background: var(--desk);
+  border-top: 5px solid #6a4f40;
+  box-shadow: 0 5px 0 #503a2c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 信件物件 */
+.letter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.letter:hover         { transform: scale(1.12) rotate(-3deg); }
+.letter-icon          { font-size: 30px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5)); }
+
+/* 植物 / 馬克杯裝飾 */
+.room-plant {
+  position: absolute;
+  bottom: 80px; left: 28px;
+  font-size: 38px;
+  filter: drop-shadow(2px 3px 5px rgba(0,0,0,0.35));
+}
+.room-mug {
+  position: absolute;
+  bottom: 80px; right: 260px;
+  font-size: 22px;
+  filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.3));
+}
+
+/* 信件彈出 */
+.letter-paper {
+  background: #faf6ef;
+  color: #3a2a1a;
+  width: min(460px, 88vw);
+  padding: 34px 38px;
+  border-radius: 3px;
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.letter-date {
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: #9b8878;
+  margin-bottom: 22px;
+  letter-spacing: 2px;
+}
+.letter-body {
+  font-size: 15px;
+  line-height: 2.1;
+  text-align: center;
+  white-space: pre-wrap;
+  color: #3a2a1a;
+  min-height: 80px;
+  width: 100%;
+}
+
+/* ════════════════════════════
+   場景 3 · 回憶收集
+   ════════════════════════════ */
+#scene-memories { background: #1c1c2e; gap: 14px; }
+
+.world-wrap {
+  width: min(620px, 92vw);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+}
+
+.world {
+  position: relative;
+  width: 100%;
+  height: clamp(220px, 38vh, 310px);
+  transition: filter 1.4s ease;
+}
+
+/* 天空 */
+.world-sky {
+  position: absolute; inset: 0 0 38% 0;
+  background: linear-gradient(180deg, #6878a8 0%, #9aaac8 100%);
+}
+/* 地面 */
+.world-ground {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 38%;
+  background: linear-gradient(180deg, #5a7850 0%, #3d5538 100%);
+}
+/* 樹 */
+.world-tree {
+  position: absolute;
+  bottom: 37%;
+  width: 12px; height: 65px;
+  background: #5a4030;
+}
+.world-tree::before {
+  content: '';
+  position: absolute;
+  bottom: 60px; left: 50%; transform: translateX(-50%);
+  border: 30px solid transparent;
+  border-bottom: 52px solid #487040;
+}
+.world-tree::after {
+  content: '';
+  position: absolute;
+  bottom: 88px; left: 50%; transform: translateX(-50%);
+  border: 22px solid transparent;
+  border-bottom: 40px solid #5a8050;
+}
+.t1 { left: 8%; }
+.t2 { right: 12%; height: 50px; }
+.t2::before { border-bottom-color: #3a5c34; border-bottom-width: 42px; border-left-width: 24px; border-right-width: 24px; }
+.t2::after  { border-bottom-color: #4a7045; }
+
+/* 雲 */
+.world-cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: 50px;
+}
+.world-cloud::before {
+  content: '';
+  position: absolute;
+  top: -45%; left: 18%;
+  width: 38%; height: 190%;
+  background: inherit;
+  border-radius: 50%;
+}
+.c1 { top: 12%; left: 22%; width: 78px; height: 22px; }
+.c2 { top: 24%; right: 22%; width: 58px; height: 17px; }
+
+/* 回憶碎片 */
+.memory-spot {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.memory-spot:hover:not(.found) { transform: scale(1.12) translateY(-5px); }
+.memory-spot.found {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: saturate(0.3);
+}
+
+.ms-icon  { font-size: 34px; }
+.ms-label {
+  font-family: var(--font-px);
+  font-size: 6px;
+  color: #fff;
+  margin-top: 5px;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+}
+
+/* 呼吸光環 */
+.ms-ring {
+  position: absolute;
+  inset: -10px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  animation: pulse-ring 2.2s ease-in-out infinite;
+}
+@keyframes pulse-ring {
+  0%, 100% { transform: scale(1);    opacity: 0.55; }
+  50%       { transform: scale(1.18); opacity: 0.1;  }
+}
+
+/* 碎片位置 */
+.ms1 { bottom: 40%; left: 18%; }
+.ms2 { bottom: 40%; left: 50%; transform: translateX(-50%); }
+.ms3 { bottom: 40%; right: 18%; }
+.ms2:hover:not(.found) { transform: translateX(-50%) scale(1.12) translateY(-5px); }
+
+/* 狀態列 */
+.mem-status {
+  font-family: var(--font-px);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+}
+
+/* 回憶卡片 */
+.memory-card {
+  background: rgba(20, 20, 38, 0.96);
+  border: 1px solid rgba(247, 197, 168, 0.28);
+  border-radius: 8px;
+  padding: 34px 38px;
+  width: min(400px, 88vw);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+  animation: card-in 0.35s ease;
+}
+@keyframes card-in {
+  from { transform: scale(0.92) translateY(12px); opacity: 0; }
+  to   { transform: scale(1) translateY(0);        opacity: 1; }
+}
+
+.popup-icon  { font-size: 52px; }
+.popup-title {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--warm);
+  letter-spacing: 2px;
+}
+.popup-text {
+  font-size: 14px;
+  line-height: 2.1;
+  color: var(--text);
+  white-space: pre-wrap;
+  min-height: 64px;
+}
+
+/* ════════════════════════════
+   場景 4 · 生日房間
+   ════════════════════════════ */
+#scene-birthday {
+  background: linear-gradient(155deg, #2a1a3c 0%, #1a2a3e 100%);
+}
+
+/* 氣球 */
+.bday-deco {
+  position: absolute; top: 0; left: 0; right: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.balloon {
+  position: absolute;
+  top: 14px;
+  font-size: 42px;
+}
+.b1 { left:  8%; animation: float-b 3.2s ease-in-out infinite alternate; }
+.b2 { right: 10%; animation: float-b 2.8s ease-in-out 0.5s infinite alternate; }
+.b3 {
+  left: 50%; transform: translateX(-50%);
+  animation: float-b3 3s ease-in-out 0.9s infinite alternate;
+}
+@keyframes float-b  {
+  from { transform: translateY(0) rotate(-6deg); }
+  to   { transform: translateY(-22px) rotate(6deg); }
+}
+@keyframes float-b3 {
+  from { transform: translateX(-50%) translateY(0); }
+  to   { transform: translateX(-50%) translateY(-22px); }
+}
+
+/* 蛋糕區 */
+.bday-inner {
+  position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.cake-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.cake-emoji {
+  font-size: 88px;
+  filter: drop-shadow(0 5px 20px rgba(247, 197, 168, 0.4));
+  transition: transform 0.3s;
+  cursor: default;
+}
+.cake-emoji.blown {
+  animation: cake-shine 0.65s ease-out;
+}
+@keyframes cake-shine {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.22);
+         filter: drop-shadow(0 5px 36px rgba(247,197,168,0.95)); }
+  100% { transform: scale(1); }
+}
+
+/* 祝福訊息 */
+.bday-msg {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: min(500px, 88vw);
+  animation: msg-in 0.6s ease forwards;
+}
+.bday-msg.hidden { display: none; }
+
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.bday-text {
+  font-size: 16px;
+  line-height: 2.3;
+  color: var(--warm);
+  white-space: pre-wrap;
+  min-height: 80px;
+  text-shadow: 0 0 20px rgba(247, 197, 168, 0.25);
+}
+
+.final-hud {
+  font-family: var(--font-px);
+  font-size: 10px;
+  color: var(--pink);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(244, 160, 176, 0.28);
+  border-radius: 6px;
+  padding: 9px 18px;
+  letter-spacing: 1.5px;
+  transition: all 0.3s;
+}
