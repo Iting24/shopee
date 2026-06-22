@@ -203,6 +203,57 @@ html, body {
 }
 
 /* ════════════════════════════
+   Chapter 0 · 在你遇見我之前
+   ════════════════════════════ */
+#scene-chapter0 {
+  background: #09090f;
+  cursor: pointer;
+}
+
+.ch0-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 40px;
+}
+
+.ch0-text {
+  font-family: var(--font-s);
+  font-size: clamp(17px, 4vw, 24px);
+  color: #ece5da;
+  text-align: center;
+  line-height: 2.4;
+  white-space: pre-wrap;
+  max-width: 460px;
+  animation: ch0-fade 0.7s ease forwards;
+}
+
+/* 銀牌那張特別大 */
+.ch0-text.highlight {
+  color: var(--warm);
+  font-size: clamp(20px, 5vw, 30px);
+}
+
+.ch0-hint {
+  position: absolute;
+  bottom: 44px;
+  font-family: var(--font-px);
+  font-size: 7px;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 2.5px;
+  animation: blink 1.8s step-end infinite;
+}
+
+@keyframes ch0-fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ════════════════════════════
    場景 2 · 灰色房間
    ════════════════════════════ */
 #scene-chapter1 { background: #1c1c2e; gap: 0; }

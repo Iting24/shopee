@@ -92,6 +92,18 @@ const BIRTHDAY_TEXT =
 const VIDEO_URL = null;
 // const VIDEO_URL = 'https://youtu.be/你的影片ID';
 
+// Chapter 0 的七張卡片
+// ↓ 替換：想修改他的故事就改這裡
+const CHAPTER0_SLIDES = [
+  `2005 年 8 月 4 日\n\n吳秉穎出生了。`,
+  `國中，他進了技藝班。\n\n學的是雲端運算。`,
+  `2023 年\n第五十三屆全國技能競賽\n\n銀牌。`,
+  `那些年，也發生了很多事。\n\n很多人，很多傷。\n\n他沒有說太多。`,
+  `他打麻將。\n他跟朋友出去。\n\n還有無數個\n一個人低落的夜晚。\n\n他就這樣撐過來了。`,
+  `後來他轉學了。\n\n轉到了台科大。`,
+  `有人說他二十歲\n會有很多難關。\n\n二十歲，第二個月——\n\n我出現了。`,
+];
+
 /* ════════════════════════════════════════════
    ↑↑↑  替換文案區結束  ↑↑↑
    以下是遊戲邏輯，通常不需要修改
@@ -182,7 +194,37 @@ function initStart() {
   buildStars();
 
   document.getElementById('btn-start').addEventListener('click', () => {
-    goTo('scene-start', 'scene-chapter1', initChapter1);
+    goTo('scene-start', 'scene-chapter0', initChapter0);
+  });
+}
+
+/* ════════════════════════════
+   Chapter 0 · 在你遇見我之前
+   ════════════════════════════ */
+function initChapter0() {
+  let idx = 0;
+  const textEl = document.getElementById('ch0-text');
+  const scene  = document.getElementById('scene-chapter0');
+
+  function showSlide(i) {
+    const isAward = i === 2; // 銀牌那張
+    textEl.className = isAward ? 'ch0-text highlight' : 'ch0-text';
+    // 重啟動畫
+    textEl.style.animation = 'none';
+    void textEl.offsetWidth;
+    textEl.style.animation = '';
+    textEl.textContent = CHAPTER0_SLIDES[i];
+  }
+
+  showSlide(0);
+
+  scene.addEventListener('click', () => {
+    idx++;
+    if (idx < CHAPTER0_SLIDES.length) {
+      showSlide(idx);
+    } else {
+      goTo('scene-chapter0', 'scene-chapter1', initChapter1);
+    }
   });
 }
 
