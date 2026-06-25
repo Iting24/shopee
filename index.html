@@ -1,214 +1,144 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- ↓ 替換：遊戲標題（顯示在瀏覽器分頁） -->
-  <title>在遇見妳之後</title>
+  <title>下一頁，繼續是你</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <div class="shell">
+    <section id="start-screen" class="start-screen">
+      <div class="start-noise"></div>
+      <div class="start-card pixel-panel">
+        <p class="start-kicker">生日故事模式</p>
+        <h1>下一頁，<br>繼續是你</h1>
+        <p class="start-date">2005.08.04 → now</p>
+        <p class="start-copy">
+          先看見你。
+          <span>再走到我們。</span>
+        </p>
+        <button id="start-button" class="pixel-button">PRESS START</button>
+      </div>
+    </section>
 
-  <!-- ══════════════════════════════
-       HUD：陪伴值（左上角常駐）
-       ══════════════════════════════ -->
-  <div id="hud" class="hud hidden">
-    ♡ 陪伴值 <span id="hud-value">0</span> / 999
-  </div>
-
-  <!-- ══════════════════════════════
-       場景 1：開始畫面
-       ══════════════════════════════ -->
-  <div id="scene-start" class="scene active">
-    <!-- 星空背景（JS 自動生成） -->
-    <div id="star-canvas"></div>
-
-    <div class="start-content">
-      <p class="label-pixel">A Birthday Game</p>
-
-      <!-- ↓ 替換：遊戲主標題 -->
-      <h1 class="game-title">在遇見妳之後</h1>
-      <p class="label-pixel" style="margin-top:-8px;opacity:0.5">After Meeting You</p>
-
-      <!-- ↓ 替換：開場一句話 -->
-      <p class="start-desc">某天醒來，世界少了一個顏色。</p>
-
-      <button id="btn-start" class="pixel-btn">▶ Press Start</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════
-       場景 1.5：Chapter 0 在你遇見我之前
-       ══════════════════════════════ -->
-  <div id="scene-chapter0" class="scene">
-    <div class="ch0-inner">
-      <div id="ch0-text" class="ch0-text"></div>
-      <div class="ch0-hint">點擊繼續</div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════
-       場景 2：第一章 灰色房間
-       ══════════════════════════════ -->
-  <div id="scene-chapter1" class="scene">
-    <!-- ↓ 替換：章節標題 -->
-    <div class="chapter-tag">Chapter 1 · 灰色的早晨</div>
-
-    <div class="room-wrap">
-      <div id="room" class="room grayscale-full">
-
-        <!-- 窗戶 -->
-        <div class="room-window">
-          <div class="win-bar win-h"></div>
-          <div class="win-bar win-v"></div>
+    <main id="game-shell" class="game-shell hidden">
+      <header class="page-header">
+        <div class="page-copy">
+          <p class="eyebrow">人生像素錄</p>
+          <h2>吳秉穎的人生篇章</h2>
+          <p class="page-intro">慢慢看。</p>
         </div>
+        <div class="chapter-pill" id="chapter-progress-label">1 / 7</div>
+      </header>
 
-        <!-- 桌子 + 信件（可點擊） -->
-        <div class="room-desk">
-          <!-- ↓ 替換圖片：把下面 div 換成 <img src="assets/images/letter.png" class="letter-img clickable"> -->
-          <div id="letter" class="letter clickable">
-            <div class="letter-icon">✉</div>
-            <div class="blink-hint">點擊查看</div>
+      <nav id="chapter-list" class="chapter-list chapter-rail" aria-label="人生章節"></nav>
+
+      <section class="stage-panel">
+        <section class="display-card">
+          <section id="scene-frame" class="scene-frame" data-theme="origins">
+            <div class="scene-art">
+              <div class="scene-atmosphere"></div>
+              <div class="scene-overlay scene-overlay-a"></div>
+              <div class="scene-overlay scene-overlay-b"></div>
+              <div class="scene-overlay scene-overlay-c"></div>
+              <div class="scene-props">
+                <div class="scene-prop scene-prop-a"></div>
+                <div class="scene-prop scene-prop-b"></div>
+                <div class="scene-prop scene-prop-c"></div>
+                <div class="scene-prop scene-prop-d"></div>
+                <div class="scene-prop scene-prop-e"></div>
+              </div>
+              <div class="scene-pixels"></div>
+              <div class="scene-glow"></div>
+              <div class="scene-grid"></div>
+
+              <div class="scene-copy">
+                <p id="scene-era" class="scene-era"></p>
+                <h3 id="scene-title" class="scene-title"></h3>
+                <button id="toggle-story-button" class="text-trigger" type="button">顯示這章文字</button>
+                <p id="scene-subtitle" class="scene-subtitle hidden"></p>
+              </div>
+
+              <div class="scene-nav">
+                <button id="prev-button" class="pixel-button alt" type="button">←</button>
+                <button id="next-button" class="pixel-button" type="button">→</button>
+              </div>
+
+              <button id="final-room-button" class="pixel-button alt final-entry hidden" type="button">
+                打開生日房間
+              </button>
+
+              <div id="scene-hotspots" class="scene-hotspots" aria-label="互動回憶點"></div>
+              <div id="scene-memory-ribbon" class="scene-memory-ribbon" aria-label="場景內回憶"></div>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="memory-modal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="memory-title">
+    <div class="overlay-backdrop" data-close="memory"></div>
+    <article class="memory-card pixel-panel">
+      <button id="memory-close" class="overlay-close" type="button" aria-label="關閉">×</button>
+      <div class="memory-media">
+        <div class="memory-visual pixel-frame">
+          <img id="memory-image" alt="" class="hidden">
+          <div id="memory-placeholder" class="photo-placeholder">
+            <span class="placeholder-chip">這一頁先留白</span>
+            <strong id="memory-placeholder-label">等你把這張照片放進來。</strong>
           </div>
         </div>
 
-        <!-- ↓ 替換：桌面擺飾（emoji 或圖片都行） -->
-        <div class="room-plant">🌿</div>
-        <div class="room-mug">☕</div>
-
-        <!-- 地板 -->
-        <div class="room-floor"></div>
+        <div class="memory-text">
+          <p id="memory-kicker" class="eyebrow"></p>
+          <h3 id="memory-title-text" class="memory-title"></h3>
+          <p id="memory-caption" class="memory-caption"></p>
+        </div>
       </div>
-    </div>
-
-    <!-- 信件彈出層 -->
-    <div id="letter-overlay" class="overlay hidden">
-      <div class="letter-paper">
-        <!-- ↓ 替換：信件日期 -->
-        <div class="letter-date">今天</div>
-
-        <!-- 文字由 JS 打字機寫入，內容在 game.js 的 LETTER_TEXT -->
-        <div id="letter-body" class="letter-body"></div>
-
-        <button id="btn-letter-close" class="pixel-btn small">繼續 →</button>
-      </div>
-    </div>
+    </article>
   </div>
 
-  <!-- ══════════════════════════════
-       場景 3：回憶收集
-       ══════════════════════════════ -->
-  <div id="scene-memories" class="scene">
-    <!-- ↓ 替換：場景說明文字 -->
-    <div class="chapter-tag">找回那些回憶</div>
-
-    <div class="world-wrap">
-      <div id="world" class="world grayscale-full">
-
-        <!-- 背景元素（純 CSS 繪製） -->
-        <div class="world-sky"></div>
-        <div class="world-ground"></div>
-        <div class="world-tree t1"></div>
-        <div class="world-tree t2"></div>
-        <div class="world-cloud c1"></div>
-        <div class="world-cloud c2"></div>
-
-        <!-- ↓ 回憶碎片 1：替換 icon 和地點名稱 -->
-        <div class="memory-spot ms1" id="mem-0" data-idx="0">
-          <div class="ms-icon">☕</div>
-          <div class="ms-label">那間咖啡廳</div>
-          <div class="ms-ring"></div>
-        </div>
-
-        <!-- ↓ 回憶碎片 2：替換 icon 和地點名稱 -->
-        <div class="memory-spot ms2" id="mem-1" data-idx="1">
-          <div class="ms-icon">🌸</div>
-          <div class="ms-label">公園的角落</div>
-          <div class="ms-ring"></div>
-        </div>
-
-        <!-- ↓ 回憶碎片 3：替換 icon 和地點名稱 -->
-        <div class="memory-spot ms3" id="mem-2" data-idx="2">
-          <div class="ms-icon">🌙</div>
-          <div class="ms-label">深夜的通話</div>
-          <div class="ms-ring"></div>
-        </div>
-
+  <div id="final-modal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="final-title">
+    <div class="overlay-backdrop" data-close="final"></div>
+    <section class="final-room pixel-panel">
+      <button id="final-close" class="overlay-close" type="button" aria-label="關閉">×</button>
+      <div class="final-header">
+        <p class="eyebrow">下一個篇章</p>
+        <h3 id="final-title">生日房間</h3>
+        <p class="final-copy">
+          這裡留給你最後想讓他看到的照片、影片，還有未來。
+        </p>
       </div>
-    </div>
 
-    <div class="mem-status">
-      已找回 <span id="mem-count">0</span> / 3 個回憶
-    </div>
+      <div class="final-layout">
+        <div class="final-video pixel-frame">
+          <video id="final-video" class="hidden" controls playsinline></video>
+          <div id="final-video-placeholder" class="video-placeholder">
+            <span class="placeholder-chip">生日影片</span>
+            <strong>這裡會放你留給他的最後一段話。</strong>
+            <p>等你把影片放進來，這裡就會變成結尾。</p>
+          </div>
+        </div>
 
-    <!-- 全部找完才出現 -->
-    <button id="btn-to-birthday" class="pixel-btn gone">
-      走向生日房間 →
-    </button>
+        <div class="final-side">
+          <div class="final-note pixel-frame">
+            <p class="eyebrow">最後的話</p>
+            <p id="final-note">
+              20 歲不一定只有難關。
+              有些新的篇章，也會在這一年開始。
+            </p>
+          </div>
 
-    <!-- 回憶內容彈出層 -->
-    <div id="mem-popup" class="overlay hidden">
-      <div class="memory-card">
-        <div id="popup-icon"  class="popup-icon"></div>
-        <div id="popup-title" class="popup-title"></div>
-        <!-- 文字由 JS 打字機寫入，內容在 game.js 的 MEMORIES -->
-        <div id="popup-text"  class="popup-text"></div>
-        <button id="btn-popup-close" class="pixel-btn small">放入心裡 ♡</button>
+          <div id="final-gallery" class="final-gallery"></div>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
-
-  <!-- ══════════════════════════════
-       場景 4：生日房間
-       ══════════════════════════════ -->
-  <div id="scene-birthday" class="scene">
-
-    <!-- 氣球裝飾 -->
-    <div class="bday-deco" aria-hidden="true">
-      <span class="balloon b1">🎈</span>
-      <span class="balloon b2">🎈</span>
-      <span class="balloon b3">🎉</span>
-    </div>
-
-    <div class="bday-inner">
-      <!-- 蛋糕區 -->
-      <div class="cake-area">
-        <!-- ↓ 替換圖片：可換成 <img src="assets/images/cake.png" class="cake-img"> -->
-        <div id="cake" class="cake-emoji">🎂</div>
-        <button id="btn-blow" class="pixel-btn">吹蠟燭 ✦</button>
-      </div>
-
-      <!-- 祝福訊息（吹蠟燭後出現） -->
-      <div id="bday-msg" class="bday-msg hidden">
-        <!-- 文字由 JS 打字機寫入，內容在 game.js 的 BIRTHDAY_TEXT -->
-        <div id="bday-text" class="bday-text"></div>
-
-        <!-- 最終陪伴值 -->
-        <div class="final-hud">
-          ♡ 陪伴值 <span id="final-counter">0</span> / 999
-        </div>
-
-        <!-- ↓ 替換連結：把 href 換成你的影片網址（YouTube / Google Drive 分享連結） -->
-        <!-- 如果不需要影片，刪除下面這整行 -->
-        <a id="btn-video"
-           href="#VIDEO_URL_HERE"
-           target="_blank"
-           rel="noopener"
-           class="pixel-btn video-btn gone">
-          ▶ 播放影片祝福
-        </a>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══════════════════════════════
-       全螢幕轉場黑幕
-       ══════════════════════════════ -->
-  <div id="fade" class="fade-overlay"></div>
 
   <script src="js/game.js"></script>
 </body>
